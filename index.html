@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pac-Sonar</title>
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5eee4;
+      color: #2e3b1d;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .instructions {
+      max-width: 600px;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-template-rows: repeat(10, 40px);
+      gap: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+    }
+
+    .sample {
+      background-color: #dff0aa;
+    }
+
+    .noise {
+      background-color: #ff7675;
+    }
+
+    .player {
+      background-color: #55efc4;
+    }
+
+    .empty {
+      background-color: #dfe6e9;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #2e3b1d;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pac-Sonar</h1>
+  <div class="instructions">
+    <p>
+      ¡Explora la ciudad y recolecta sonidos!<br />
+      Cada punto verde es un sample de audio real.<br />
+      Evita el ruido (rojo) o se apagará el paisaje sonoro.<br />
+      Usa las teclas de flecha para moverte.
+    </p>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <button onclick="resetGame()">Reiniciar nivel</button>
+
+  <script>
+    const grid = document.getElementById("grid");
+    const width = 10;
+    const height = 10;
+    const cells = [];
+    let playerPosition;
+    let sampleIndexes;
+    const noiseIndexes = [10, 19, 33, 45, 80];
+
+    function randomSample() {
+      const newSamples = [];
+      while (newSamples.length < 6) {
+        let index = Math.floor(Math.random() * width * height);
+        if (!newSamples.includes(index) && !noiseIndexes.includes(index)) {
+          newSamples.push(index);
+        }
+      }
+      return newSamples;
+    }
+
+    function drawGrid() {
+      grid.innerHTML = "";
+      for (let i = 0; i < width * height; i++) {
+        const div = document.createElement("div");
+        div.classList.add("cell");
+
+        if (i === playerPosition) {
+          div.classList.add("player");
+        } else if (sampleIndexes.includes(i)) {
+          div.classList.add("sample");
+        } else if (noiseIndexes.includes(i)) {
+          div.classList.add("noise");
+        } else {
+          div.classList.add("empty");
+        }
+
+        grid.appendChild(div);
+        cells[i] = div;
+      }
+    }
+
+    function movePlayer(direction) {
+      let nextPosition = playerPosition;
+
+      if (direction === "ArrowRight" && (playerPosition + 1) % width !== 0) {
+        nextPosition++;
+      } else if (direction === "ArrowLeft" && playerPosition % width !== 0) {
+        nextPosition--;
+      } else if (direction === "ArrowUp" && playerPosition - width >= 0) {
+        nextPosition -= width;
+      } else if (direction === "ArrowDown" && playerPosition + width < width * height) {
+        nextPosition += width;
+      }
+
+      if (noiseIndexes.includes(nextPosition)) {
+        alert("¡Fuiste atrapado por el ruido! El sonido se apaga...");
+        return;
+      }
+
+      playerPosition = nextPosition;
+
+      const sampleIndex = sampleIndexes.indexOf(playerPosition);
+      if (sampleIndex !== -1) {
+        sampleIndexes.splice(sampleIndex, 1);
+        alert("Sample recolectado 🎧");
+        // Reaparece una nueva muestra en una celda vacía aleatoria
+        let newSample;
+        do {
+          newSample = Math.floor(Math.random() * width * height);
+        } while (sampleIndexes.includes(newSample) || noiseIndexes.includes(newSample) || newSample === playerPosition);
+        sampleIndexes.push(newSample);
+      }
+
+      drawGrid();
+    }
+
+    function resetGame() {
+      playerPosition = 0;
+      sampleIndexes = randomSample();
+      drawGrid();
+    }
+
+    document.addEventListener("keydown", (e) => movePlayer(e.key));
+
+    resetGame();
+  </script>
+</body>
+</html>
