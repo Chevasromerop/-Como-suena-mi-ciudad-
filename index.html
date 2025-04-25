@@ -69,6 +69,21 @@
       border-radius: 8px;
       display: none;
     }
+
+    .reset-btn {
+      padding: 0.5rem 1.5rem;
+      font-size: 1rem;
+      background-color: #b0d96f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Fredoka', sans-serif;
+      transition: background-color 0.3s ease;
+    }
+
+    .reset-btn:hover {
+      background-color: #a1c35d;
+    }
   </style>
 </head>
 <body>
@@ -84,6 +99,7 @@
 
   <div class="grid" id="grid"></div>
   <div id="message">🎧 Sample recolectado</div>
+  <button onclick="resetLevel()" class="reset-btn">Reiniciar nivel</button>
 
   <script>
     const grid = document.getElementById("grid");
@@ -92,8 +108,16 @@
     const cells = [];
     let playerPosition = 0;
 
-    const sampleIndexes = [2, 4, 15, 22, 38, 67];
+    let sampleIndexes = [2, 4, 15, 22, 38, 67];
     const noiseIndexes = [10, 19, 33, 45, 80];
+
+    function getRandomEmptyCell() {
+      let empty;
+      do {
+        empty = Math.floor(Math.random() * width * height);
+      } while (sampleIndexes.includes(empty) || noiseIndexes.includes(empty) || empty === playerPosition);
+      return empty;
+    }
 
     function drawGrid() {
       grid.innerHTML = "";
@@ -125,6 +149,12 @@
       }, 2000);
     }
 
+    function resetLevel() {
+      playerPosition = 0;
+      sampleIndexes = [getRandomEmptyCell(), getRandomEmptyCell(), getRandomEmptyCell()];
+      drawGrid();
+    }
+
     function movePlayer(direction) {
       let nextPosition = playerPosition;
 
@@ -140,25 +170,28 @@
 
       if (noiseIndexes.includes(nextPosition)) {
         alert("¡Fuiste atrapado por el ruido! El sonido se apaga...");
+        resetLevel();
         return;
       }
 
       playerPosition = nextPosition;
 
-const sampleIndex = sampleIndexes.indexOf(playerPosition);
-if (sampleIndex !== -1) {
-  sampleIndexes.splice(sampleIndex, 1);
-  const audio = new Audio("./audios/audio1.mp3");
-  audio.play();
+      const sampleIndex = sampleIndexes.indexOf(playerPosition);
+      if (sampleIndex !== -1) {
+        sampleIndexes.splice(sampleIndex, 1);
+        const audio = new Audio("./audios/audio1.mp3");
+        audio.play();
+        setTimeout(() => {
+          audio.pause();
+          audio.currentTime = 0;
+        }, 2000);
 
-  // Detener el audio a los 2 segundos
-  setTimeout(() => {
-    audio.pause();
-    audio.currentTime = 0;
-  }, 2000);
+        showMessage("🎧 Sample recolectado");
 
-  showMessage("🎧 Sample recolectado");
-}
+        // Spawnear un nuevo sample aleatorio
+        const newSample = getRandomEmptyCell();
+        sampleIndexes.push(newSample);
+      }
 
       drawGrid();
     }
