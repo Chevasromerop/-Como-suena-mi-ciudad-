@@ -14,6 +14,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
     }
 
     h1 {
@@ -57,14 +58,16 @@
       background-color: #dfe6e9;
     }
 
-    button {
+    #message {
+      position: absolute;
+      top: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2e3b1d;
+      background-color: #dff0aa;
       padding: 0.5rem 1rem;
-      font-size: 1rem;
-      border: none;
-      background-color: #2e3b1d;
-      color: white;
       border-radius: 8px;
-      cursor: pointer;
+      display: none;
     }
   </style>
 </head>
@@ -80,28 +83,17 @@
   </div>
 
   <div class="grid" id="grid"></div>
-
-  <button onclick="resetGame()">Reiniciar nivel</button>
+  <div id="message">🎧 Sample recolectado</div>
 
   <script>
     const grid = document.getElementById("grid");
     const width = 10;
     const height = 10;
     const cells = [];
-    let playerPosition;
-    let sampleIndexes;
-    const noiseIndexes = [10, 19, 33, 45, 80];
+    let playerPosition = 0;
 
-    function randomSample() {
-      const newSamples = [];
-      while (newSamples.length < 6) {
-        let index = Math.floor(Math.random() * width * height);
-        if (!newSamples.includes(index) && !noiseIndexes.includes(index)) {
-          newSamples.push(index);
-        }
-      }
-      return newSamples;
-    }
+    const sampleIndexes = [2, 4, 15, 22, 38, 67];
+    const noiseIndexes = [10, 19, 33, 45, 80];
 
     function drawGrid() {
       grid.innerHTML = "";
@@ -122,6 +114,15 @@
         grid.appendChild(div);
         cells[i] = div;
       }
+    }
+
+    function showMessage(text) {
+      const message = document.getElementById("message");
+      message.textContent = text;
+      message.style.display = "block";
+      setTimeout(() => {
+        message.style.display = "none";
+      }, 2000);
     }
 
     function movePlayer(direction) {
@@ -147,27 +148,17 @@
       const sampleIndex = sampleIndexes.indexOf(playerPosition);
       if (sampleIndex !== -1) {
         sampleIndexes.splice(sampleIndex, 1);
-        alert("Sample recolectado 🎧");
-        // Reaparece una nueva muestra en una celda vacía aleatoria
-        let newSample;
-        do {
-          newSample = Math.floor(Math.random() * width * height);
-        } while (sampleIndexes.includes(newSample) || noiseIndexes.includes(newSample) || newSample === playerPosition);
-        sampleIndexes.push(newSample);
+        const audio = new Audio("./audios/audio1.mp3");
+        audio.play();
+        showMessage("🎧 Sample recolectado");
       }
 
       drawGrid();
     }
 
-    function resetGame() {
-      playerPosition = 0;
-      sampleIndexes = randomSample();
-      drawGrid();
-    }
-
     document.addEventListener("keydown", (e) => movePlayer(e.key));
 
-    resetGame();
+    drawGrid();
   </script>
 </body>
 </html>
