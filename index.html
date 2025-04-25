@@ -145,13 +145,20 @@
 
       playerPosition = nextPosition;
 
-      const sampleIndex = sampleIndexes.indexOf(playerPosition);
-      if (sampleIndex !== -1) {
-        sampleIndexes.splice(sampleIndex, 1);
-        const audio = new Audio("./audios/audio1.mp3");
-        audio.play();
-        showMessage("🎧 Sample recolectado");
-      }
+const sampleIndex = sampleIndexes.indexOf(playerPosition);
+if (sampleIndex !== -1) {
+  sampleIndexes.splice(sampleIndex, 1);
+  const audio = new Audio("./audios/audio1.mp3");
+  audio.play();
+
+  // Detener el audio a los 2 segundos
+  setTimeout(() => {
+    audio.pause();
+    audio.currentTime = 0;
+  }, 2000);
+
+  showMessage("🎧 Sample recolectado");
+}
 
       drawGrid();
     }
